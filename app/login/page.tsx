@@ -49,7 +49,7 @@ export default function LoginPage() {
 
       const user = loginUser(data.email, data.password)
 
-      if (user) {
+      if (user && !('error' in user)) {
         setSuccess(`Welcome back, ${user.firstName}! Redirecting...`)
 
         setTimeout(() => {
@@ -63,6 +63,8 @@ export default function LoginPage() {
             router.push("/dashboard/student")
           }
         }, 1000)
+      } else if (user && 'error' in user) {
+        setError(user.error)
       } else {
         setError("Invalid email or password. Please check your credentials.")
       }

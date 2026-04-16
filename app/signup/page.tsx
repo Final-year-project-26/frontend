@@ -192,11 +192,16 @@ export default function SignupPage() {
 
       const user = registerUser(data)
 
-      setSuccess(`Account created successfully! Welcome, ${user.firstName}.`)
-
-      setTimeout(() => {
-        router.push(role === "student" ? "/dashboard/student" : "/dashboard/tutor")
-      }, 1500)
+      if (user.role === "student") {
+        setSuccess(`Account created successfully! Welcome, ${user.firstName}.`)
+        setTimeout(() => {
+          router.push("/dashboard/student")
+        }, 1500)
+      } else {
+        setSuccess(`Application submitted! We have received your documents, ${user.firstName}. Our institutional board will review your credentials and notify you via email when your account is activated.`)
+        // Do not redirect tutors, let them see the message
+        setStep(totalSteps + 1) // Move to a "Success" step if we want, or just stay
+      }
     } catch (err) {
       setError("An error occurred during signup. Please try again.")
     } finally {
@@ -253,34 +258,38 @@ export default function SignupPage() {
             </button>
           </div>
           {/* Header */}
-          <div className="text-center mb-3">
-            <h1 className="text-xl font-bold text-white mb-1">Create Account</h1>
-            <p className="text-white/60 text-xs">Step {step} of {totalSteps}: {stepItems[step - 1].title}</p>
-          </div>
+          {step <= totalSteps && (
+            <div className="text-center mb-3">
+              <h1 className="text-xl font-bold text-white mb-1">Create Account</h1>
+              <p className="text-white/60 text-xs text-center">Step {step} of {totalSteps}: {stepItems[step - 1]?.title}</p>
+            </div>
+          )}
 
           {/* Progress Indicator */}
-          <div className="flex items-center justify-between mb-4 px-4">
-            {stepItems.map((item, idx) => (
-              <div key={item.number} className="flex items-center flex-1 last:flex-none">
-                <div className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-smooth",
-                  step === item.number
-                    ? "bg-sky-500 text-white shadow-lg shadow-sky-500/20 scale-110"
-                    : step > item.number
-                      ? "bg-emerald-500 text-white"
-                      : "bg-white/10 text-white/40"
-                )}>
-                  {step > item.number ? <CheckCircle2 className="w-5 h-5" /> : item.number}
-                </div>
-                {idx < stepItems.length - 1 && (
+          {step <= totalSteps && (
+            <div className="flex items-center justify-between mb-4 px-4">
+              {stepItems.map((item, idx) => (
+                <div key={item.number} className="flex items-center flex-1 last:flex-none">
                   <div className={cn(
-                    "h-[2px] flex-1 mx-2 transition-smooth",
-                    step > item.number ? "bg-emerald-500" : "bg-white/10"
-                  )} />
-                )}
-              </div>
-            ))}
-          </div>
+                    "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-smooth",
+                    step === item.number
+                      ? "bg-sky-500 text-white shadow-lg shadow-sky-500/20 scale-110"
+                      : step > item.number
+                        ? "bg-emerald-500 text-white"
+                        : "bg-white/10 text-white/40"
+                  )}>
+                    {step > item.number ? <CheckCircle2 className="w-5 h-5" /> : item.number}
+                  </div>
+                  {idx < stepItems.length - 1 && (
+                    <div className={cn(
+                      "h-[2px] flex-1 mx-2 transition-smooth",
+                      step > item.number ? "bg-emerald-500" : "bg-white/10"
+                    )} />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Modern Role Selection Tabs (Only on Step 1) */}
           {step === 1 && (
@@ -593,50 +602,73 @@ export default function SignupPage() {
               </div>
             )}
 
-            <div className="flex gap-4 pt-2">
-              {step < totalSteps ? (
+            {/* Success Stage for Tutors */}
+            {step > totalSteps && (
+              <div className="py-10 flex flex-col items-center text-center space-y-6 animate-in zoom-in-95 duration-500">
+                <div className="w-20 h-20 rounded-[30px] bg-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-xl shadow-emerald-500/10 border border-emerald-500/20">
+                  <CheckCircle2 className="w-10 h-10" />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-bold text-white">Application Received</h2>
+                  <p className="text-white/60 text-xs leading-relaxed max-w-xs mx-auto">
+                    Your credentials have been submitted to our institutional board. We will notify you via email once your account is activated.
+                  </p>
+                </div>
                 <Button
-                  type="button"
-                  onClick={nextStep}
-                  className={cn(
-                    "group w-full border-0 py-6 font-semibold text-white transition-smooth shadow-lg",
-                    role === "student"
-                      ? "bg-sky-500 shadow-sky-500/20 hover:bg-sky-400"
-                      : "bg-emerald-500 shadow-emerald-500/20 hover:bg-emerald-400"
-                  )}
+                  onClick={() => router.push("/login")}
+                  className="bg-white/10 hover:bg-white/20 text-white rounded-xl px-10 py-6 font-bold transition-all border border-white/10"
                 >
-                  <span className="flex items-center gap-2">
-                    Continue to {stepItems[step].title}
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </span>
+                  Return to Login
                 </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className={cn(
-                    "group w-full border-0 py-6 font-semibold text-white transition-smooth shadow-lg",
-                    role === "student"
-                      ? "bg-sky-500 shadow-sky-500/20 hover:bg-sky-400"
-                      : "bg-emerald-500 shadow-emerald-500/20 hover:bg-emerald-400"
-                  )}
-                >
-                  <span className="flex items-center gap-2">
-                    {isLoading ? (
-                      <>
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                        Creating Account...
-                      </>
-                    ) : (
-                      <>
-                        Create {role === "student" ? "Student" : "Tutor"} Account
-                        <CheckCircle2 className="h-4 w-4 transition-transform group-hover:scale-110" />
-                      </>
+              </div>
+            )}
+
+            {step <= totalSteps && (
+              <div className="flex gap-4 pt-2">
+                {step < totalSteps ? (
+                  <Button
+                    type="button"
+                    onClick={nextStep}
+                    className={cn(
+                      "group w-full border-0 py-6 font-semibold text-white transition-smooth shadow-lg",
+                      role === "student"
+                        ? "bg-sky-500 shadow-sky-500/20 hover:bg-sky-400"
+                        : "bg-emerald-500 shadow-emerald-500/20 hover:bg-emerald-400"
                     )}
-                  </span>
-                </Button>
-              )}
-            </div>
+                  >
+                    <span className="flex items-center gap-2">
+                      Continue to {stepItems[step].title}
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className={cn(
+                      "group w-full border-0 py-6 font-semibold text-white transition-smooth shadow-lg",
+                      role === "student"
+                        ? "bg-sky-500 shadow-sky-500/20 hover:bg-sky-400"
+                        : "bg-emerald-500 shadow-emerald-500/20 hover:bg-emerald-400"
+                    )}
+                  >
+                    <span className="flex items-center gap-2">
+                      {isLoading ? (
+                        <>
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                          Creating Account...
+                        </>
+                      ) : (
+                        <>
+                          Create {role === "student" ? "Student" : "Tutor"} Account
+                          <CheckCircle2 className="h-4 w-4 transition-transform group-hover:scale-110" />
+                        </>
+                      )}
+                    </span>
+                  </Button>
+                )}
+              </div>
+            )}
           </form>
 
           {/* Footer */}

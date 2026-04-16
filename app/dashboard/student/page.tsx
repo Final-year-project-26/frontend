@@ -8,7 +8,7 @@ import {
   Zap, MessageSquare, Lightbulb, TrendingUp, Target, Users
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { courses, upcomingDeadlines, recentActivity, announcements } from "@/lib/student-data"
+import { courses, upcomingDeadlines, recentActivity, announcements } from "@/lib/mock-data"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 

@@ -417,3 +417,11 @@ function AdminOverviewContent() {
     </div>
   );
 }
+
+export default function AdminOverviewPage() {
+  return (
+    <Suspense fallback={<div>Loading Overview...</div>}>
+      <AdminOverviewContent />
+    </Suspense>
+  );
+}
